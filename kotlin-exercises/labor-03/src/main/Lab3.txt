@@ -1,0 +1,61 @@
+data class QuizItem(val question: String, val options: List<String>, val correctAnswer: String)
+
+class ItemRepository {
+    // For simplicity, initialize items here
+    val quizItems = listOf(
+        QuizItem("What is the capital of Kotlin?", listOf("Moscow", "St. Petersburg", "Mountain View", "None"), "Mountain View"),
+        QuizItem("In Kotlin, what does 'val' keyword represent?", listOf("Variable", "Value", "Volatile", "Validation"), "Value"),
+        QuizItem("What is the primary constructor in Kotlin?", listOf("Constructor without parameters", "Constructor with default parameters", "Secondary constructor", "None"), "Constructor with default parameters"),
+        QuizItem("What is the default visibility modifier in Kotlin?", listOf("public", "internal", "protected", "private"), "public"),
+        QuizItem("What does 'null' represent in Kotlin?", listOf("An object", "A function", "A keyword", "A reference that does not point to any object"), "A reference that does not point to any object"),
+        QuizItem("What is the purpose of 'lateinit' in Kotlin?", listOf("To initialize a variable later", "To declare a constant", "To mark a variable as nullable", "To define a lambda function"), "To initialize a variable later"),
+        QuizItem("What does the 'by' keyword in Kotlin delegate to?", listOf("Inheritance", "Composition", "Delegation", "Extension"), "Delegation"),
+        QuizItem("What is the 'when' keyword used for in Kotlin?", listOf("Looping", "Switch statement", "Exception handling", "Type checking"), "Switch statement"),
+        QuizItem("What is the type of '1L' in Kotlin?", listOf("Int", "Long", "Float", "Double"), "Long"),
+        QuizItem("Which keyword is used for creating an extension function in Kotlin?", listOf("fun", "extension", "extend", "funct"), "fun")
+    )
+}
+
+class ItemService(private val itemRepository: ItemRepository) {
+    fun getRandomQuizItems(numberOfItems: Int): List<QuizItem> {
+        return itemRepository.quizItems.shuffled().take(numberOfItems)
+    }
+}
+
+class ItemController(private val itemService: ItemService) {
+    fun performQuiz(numberOfQuestions: Int) {
+        val quizItems = itemService.getRandomQuizItems(numberOfQuestions)
+        var correctAnswers = 0
+
+        for (item in quizItems) {
+            println(item.question)
+            item.options.forEachIndexed { index, option ->
+                println("${index + 1}. $option")
+            }
+
+            print("Your answer: ")
+            val userAnswerIndex = readLine()?.toIntOrNull()?.minus(1) ?: -1
+
+            if (userAnswerIndex in 0 until item.options.size &&
+                item.options[userAnswerIndex] == item.correctAnswer
+            ) {
+                correctAnswers++
+            }
+
+            println("\n------------------")
+        }
+
+        println("Result: $correctAnswers/${quizItems.size} correct answers.")
+    }
+}
+
+fun main() {
+    val itemRepository = ItemRepository()
+    val itemService = ItemService(itemRepository)
+    val itemController = ItemController(itemService)
+
+    // Specify the number of questions for the quiz
+    val numberOfQuestions = 10
+
+    itemController.performQuiz(numberOfQuestions)
+}
